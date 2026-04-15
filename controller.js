@@ -34,9 +34,9 @@ exports.addProfile = async(req, res) => {
 
         const [genderizeResponse,  agifyResponse, nationalizeResponse] =
         await Promise.all([
-            axios.get(`https://api.genderize.io?name=${normalizedName}`),
-            axios.get(`https://api.agify.io?name=${normalizedName}`),
-            axios.get(`https://api.nationalize.io?name=${normalizedName}`)
+            axios.get(`https://api.genderize.io?name=${normalizedName}`, { timeout: 5000 }),
+            axios.get(`https://api.agify.io?name=${normalizedName}`, { timeout: 5000 }),
+            axios.get(`https://api.nationalize.io?name=${normalizedName}`, { timeout: 5000 })
         ]);
         
 

@@ -5,6 +5,7 @@ const route = require('./route');
 const cors = require('cors');
 
 const app = express();
+console.log("SERVER FILE IS RUNNING");
 
 app.use(express.json());
 app.use(cors({
