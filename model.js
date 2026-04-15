@@ -17,9 +17,6 @@ const profileSchema = mongoose.Schema(
         country_id: String,
         country_probability: Number,
         created_at: String 
-    },
-    {
-        timestamps: true
     }
 )
 

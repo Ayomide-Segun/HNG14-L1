@@ -7,7 +7,7 @@ exports.addProfile = async(req, res) => {
     
     try {
         let profile;
-
+        
         if(typeof name !== "string"){
             return res.status(422).json({
                 status: "error",
@@ -24,10 +24,11 @@ exports.addProfile = async(req, res) => {
         const normalizedName = name.trim().toLowerCase();
         const nameExists = await Profile.findOne({ name: normalizedName });
         if(nameExists){
+            const {_id, __v, ...cleanProfile} = nameExists.toObject();
             return res.json({
                 status: "success",
                 message: "Profile already exists",
-                data: nameExists
+                data: cleanProfile
             })
         }
 
