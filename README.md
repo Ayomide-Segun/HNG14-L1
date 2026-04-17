@@ -12,25 +12,49 @@ Nationalize API
 It then returns a structured response containing demographic insights such as gender, age group, and inferred nationality.
 
 Base URL
-https://hng14-l1-production.up.railway.app
-Endpoint
+[https://hng14-l1-production.up.railway.app](https://14-1-ayomide-segun1871-vleriu8v.leapcell.dev)
 
+Endpoint
+POST /api/profiles: Creates or retrieves a profile by enriching a given name using external APIs.
+
+GET /api/profiles/{id}: Retrieves a single profile by its unique ID.
+
+GET /api/profiles: Retrieves all stored profiles with optional filtering.
+Query Parameters (optional, case-insensitive):
+gender
+country_id
+age_group
+
+DELETE /api/profiles/{id}: Deletes a profile by its unique ID. Returns 204 No Content on success.
 
 Features
-Accepts name input via POST request
-Integrates three external APIs for demographic inference
-Applies age classification logic:
-0–12: child
-13–19: teenager
-20–59: adult
-60+: senior
-Selects most probable country from Nationalize API
-Implements idempotency (prevents duplicate records for same name)
-Stores data in MongoDB with UUID v7
-Returns structured JSON response
-Handles validation and error cases
-Data Storage
+Accepts a name via POST request body
+Integrates with multiple external APIs: Gender prediction (Genderize), Age estimation (Agify), Nationality inference (Nationalize)
+Aggregates and processes responses from all APIs into a unified profile
+Applies age classification logic: 0–12: child, 13–19: teenager, 20–59: adult, 60+: senior
+Selects the most probable country based on highest probability score
 
+Implements idempotency:
+Prevents duplicate records for the same name
+Returns existing profile if already stored
+Stores structured data in MongoDB Atlas
+Generates unique identifiers using UUID v7
+
+Provides multiple RESTful endpoints for:
+Creating profiles
+Retrieving a single profile
+Listing and filtering profiles
+Deleting profiles
+
+Supports case-insensitive filtering via query parameters
+Returns clean and consistent JSON responses across all endpoints
+Implements robust error handling:
+400 (Bad Request), 422 (Unprocessable Entity), 404 (Not Found), 502 (External API failure), 500 (Server error)
+Handles external API edge cases (null or missing data)
+Includes CORS support for cross-origin requests
+Uses UTC ISO 8601 format for timestamps
+
+Data Storage
 Each profile is stored with the following structure:
 id (UUID v7)
 name
@@ -68,8 +92,8 @@ PORT=5000
 npm start
 Deployment
 
-The API is deployed on Railway:
-https://hng14-l1-production.up.railway.app
+The API is deployed on leapcell:
+https://14-1-ayomide-segun1871-vleriu8v.leapcell.dev
 
 Notes
 All timestamps are in UTC ISO 8601 format
