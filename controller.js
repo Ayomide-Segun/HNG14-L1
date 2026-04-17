@@ -25,7 +25,7 @@ exports.addProfile = async(req, res) => {
         const nameExists = await Profile.findOne({ name: normalizedName });
         if(nameExists){
             const {_id, __v, ...cleanProfile} = nameExists.toObject();
-            return res.json({
+            return res.status(200).json({
                 status: "success",
                 message: "Profile already exists",
                 data: cleanProfile
@@ -42,9 +42,9 @@ exports.addProfile = async(req, res) => {
 
         const {gender, probability, count} = genderizeResponse.data;
         if(gender === null || count === 0){
-            return res.status(422).json({
+            return res.status(502).json({
                 status: "error",
-                message: "No gender available for the given name"
+                message: "Genderize returned an invalid response"
             })
         }
         const gender_probability = probability;
@@ -52,9 +52,9 @@ exports.addProfile = async(req, res) => {
 
         const {age} = agifyResponse.data;
         if(age === null){
-            return res.status(422).json({
+            return res.status(502).json({
                 status: "error",
-                message: "No age available for the given name"
+                message: "Agify returned an invalid response"
             })
         }       
         
@@ -72,9 +72,9 @@ exports.addProfile = async(req, res) => {
 
         const countries = nationalizeResponse.data.country;
         if(!countries || countries.length === 0){
-            return res.status(422).json({
+            return res.status(502).json({
                 status: "error",
-                message: "No country data available"
+                message: "nationalize returned an invalid response"
             })
         }
 
@@ -100,7 +100,7 @@ exports.addProfile = async(req, res) => {
 
         const {_id, __v, ...cleanProfile} = profile.toObject();
         
-        res.json({
+        res.status(201).json({
             status: "success",
             data: cleanProfile
         })
@@ -108,16 +108,97 @@ exports.addProfile = async(req, res) => {
     } catch (error) {
         console.error(error.message);
 
-        if (error.response) {
-            return res.status(502).json({
-                status: "error",
-                message: "Failed to fetch data from external API"
-            });
-        }
-
         res.status(500).json({
             status: "error",
             message: error.message || "Internal server error"
         })
+    }
+}
+
+
+exports.getProfileUsingParams = async(req, res) => {
+    const {id} = req.params;
+    try {
+        const profile = await Profile.findOne({id});
+        if (!profile) {
+            return res.status(404).json({
+                status: "error",
+                message: "Profile not found"
+            });
+        }
+        const {_id, __v, ...cleanProfile} = profile.toObject();
+        res.status(200).json({
+            status: "success",
+            data: cleanProfile
+        })
+    } catch (error) {
+        res.status(500).json({
+            status: "error",
+            message: error.message || "Unable to retrieve profile"
+        })
+    }
+}
+
+exports.getProfileUsingQuery = async(req, res) => {
+    let { gender, country_id, age_group } = req.query;
+
+    try {
+        let filteredProfiles = await Profile.find();
+
+        // Apply filters if they exist
+        if (gender) {
+            filteredProfiles = filteredProfiles.filter(
+            p => p.gender.toLowerCase() === gender.toLowerCase()
+            );
+        }
+        if (country_id) {
+            filteredProfiles = filteredProfiles.filter(
+            p => p.country_id.toLowerCase() === country_id.toLowerCase()
+            );
+        }
+        if (age_group) {
+            filteredProfiles = filteredProfiles.filter(
+            p => p.age_group.toLowerCase() === age_group.toLowerCase()
+            );
+        }
+
+        res.status(200).json({
+            status: "success",
+            count: filteredProfiles.length,
+            data: filteredProfiles.map(p => ({
+                id: p.id,
+                name: p.name,
+                gender: p.gender,
+                age: p.age,
+                age_group: p.age_group,
+                country_id: p.country_id
+            }))
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: "error",
+            message: error.message || "Unable to retrieve profile"
+        })
+    }
+}
+
+exports.deleteProfiles = async(req, res) => {
+    const {id} = req.params;
+    try {
+        const profile = await Profile.findOneAndDelete({id});
+        if (!deleted) {
+            return res.status(404).json({
+                status: "error",
+                message: "Profile not found"
+            });
+        }
+
+        return res.status(204).send();
+        res.status(204);
+    } catch (error) {
+        return res.status(500).json({
+            status: "error",
+            message: "Internal server error"
+        });
     }
 }
