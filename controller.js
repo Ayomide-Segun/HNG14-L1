@@ -194,7 +194,6 @@ exports.deleteProfiles = async(req, res) => {
         }
 
         return res.status(204).send();
-        res.status(204);
     } catch (error) {
         return res.status(500).json({
             status: "error",
