@@ -185,16 +185,19 @@ exports.getProfileUsingQuery = async(req, res) => {
 exports.deleteProfiles = async(req, res) => {
     const {id} = req.params;
     try {
-        const profile = await Profile.findOneAndDelete({id});
-        if (!deleted) {
+        const profile = await Profile.findOne({id});
+
+        if (!profile) {
             return res.status(404).json({
                 status: "error",
                 message: "Profile not found"
             });
         }
+        const deletedProfile = await Profile.findOneAndDelete({id});
 
         return res.status(204).send();
     } catch (error) {
+        console.log(error);
         return res.status(500).json({
             status: "error",
             message: "Internal server error"
